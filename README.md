@@ -1,1 +1,1 @@
-# workout-log
+[JB Workout Planner](https://james-bonaguro.github.io/workout-log/)
