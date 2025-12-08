@@ -3,409 +3,263 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>JB Daily</title>
+    <title>JB Daily (Cloud)</title>
     <style>
         :root {
-            --bg: #121212;
-            --surface: #1e1e1e;
-            --surface-alt: #2d2d2d;
-            --primary: #BB86FC;
-            --text: #e0e0e0;
-            --text-muted: #a0a0a0;
-            --border: #333;
-            --success: #03dac6;
+            --bg: #121212; --surface: #1e1e1e; --surface-alt: #2d2d2d;
+            --primary: #BB86FC; --text: #e0e0e0; --text-muted: #a0a0a0;
+            --success: #03dac6; --danger: #cf6679;
             --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             --safe-bottom: env(safe-area-inset-bottom);
         }
-
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+        body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--font); height: 100vh; display: flex; flex-direction: column; }
         
-        body {
-            margin: 0; padding: 0; background: var(--bg); color: var(--text);
-            font-family: var(--font); height: 100vh; display: flex; flex-direction: column;
-        }
-
-        /* --- UTILITIES --- */
         .hidden { display: none !important; }
         .btn-reset { background: none; border: none; color: inherit; font: inherit; cursor: pointer; padding: 0; }
-        .flex-row { display: flex; align-items: center; }
-        .flex-col { display: flex; flex-direction: column; }
-        .gap-2 { gap: 8px; }
-        .w-full { width: 100%; }
+        .screen { flex: 1; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: calc(20px + var(--safe-bottom)); }
+        
+        /* Loading Overlay */
+        #loader { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 999; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #333; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* --- SCREENS & LAYOUT --- */
-        .screen {
-            flex: 1; display: flex; flex-direction: column; padding: 20px;
-            overflow-y: auto; padding-bottom: calc(20px + var(--safe-bottom));
-        }
-
-        /* --- HOME SCREEN --- */
+        /* UI Elements */
         .header-date { font-size: 32px; font-weight: 800; margin-bottom: 24px; letter-spacing: -1px; }
-
-        .weight-card {
-            background: var(--surface); border-radius: 16px; padding: 20px;
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;
-            border: 1px solid var(--border);
-        }
-        .weight-input {
-            background: transparent; border: none; color: var(--primary);
-            font-size: 36px; font-weight: 700; width: 120px; text-align: right;
-        }
-        .weight-input:focus { outline: none; }
-
-        .day-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 40px; }
-        .day-btn {
-            background: var(--surface-alt); padding: 30px 20px; border-radius: 16px;
-            font-size: 20px; font-weight: 600; text-align: center; border: 1px solid var(--border);
-            transition: transform 0.1s, background 0.2s;
-        }
-        .day-btn:active { transform: scale(0.96); background: var(--primary); color: #000; }
-
-        .manage-link {
-            text-align: center; margin-top: auto; padding: 20px;
-            color: var(--text-muted); font-size: 14px; text-decoration: underline; opacity: 0.6;
-        }
-
-        /* --- SELECTION / DB SCREENS --- */
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .page-title { font-size: 24px; font-weight: 700; margin: 0; }
+        .card { background: var(--surface); border-radius: 16px; padding: 16px; margin-bottom: 16px; }
+        .day-btn { background: var(--surface-alt); padding: 30px 20px; border-radius: 16px; font-size: 20px; font-weight: 600; text-align: center; border: 1px solid #333; display: block; width: 100%; margin-bottom: 12px; }
+        .day-btn:active { background: var(--primary); color: black; }
         
-        .list-container { display: flex; flex-direction: column; gap: 10px; }
-        
-        .item-card {
-            background: var(--surface); padding: 16px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: space-between;
-            border: 2px solid transparent; transition: 0.2s;
-        }
+        .item-card { background: var(--surface); padding: 16px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; border: 2px solid transparent; }
         .item-card.selected { border-color: var(--primary); background: rgba(187,134,252,0.05); }
+        .tag { font-size: 10px; background: #333; padding: 3px 8px; border-radius: 4px; color: #ccc; font-weight: 600; text-transform: uppercase; margin-right: 4px; }
         
-        .item-info h3 { margin: 0 0 4px 0; font-size: 17px; }
-        .item-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
-        .tag { font-size: 10px; background: #333; padding: 3px 8px; border-radius: 4px; color: #ccc; font-weight: 600; text-transform: uppercase; }
-        .tag.core { color: var(--success); }
-
-        /* --- ACTIVE SESSION --- */
-        .session-item {
-            background: var(--surface); padding: 16px; border-radius: 12px;
-            display: flex; gap: 16px; align-items: flex-start;
-        }
-        .check-circle {
-            width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--text-muted);
-            display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
-        }
-        .session-item.done .check-circle { background: var(--success); border-color: var(--success); color: #000; font-weight: bold; }
+        /* Modal & Inputs */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: none; align-items: flex-end; }
+        .modal.open { display: flex; }
+        .modal-pane { background: #1a1a1a; width: 100%; border-radius: 24px 24px 0 0; padding: 24px; max-height: 90vh; overflow-y: auto; }
+        .input-text { width: 100%; background: #333; border: none; padding: 14px; border-radius: 12px; color: white; font-size: 16px; margin-bottom: 16px; }
+        .fab { position: fixed; bottom: 30px; right: 20px; background: var(--primary); color: #000; padding: 16px 24px; border-radius: 50px; font-weight: 700; box-shadow: 0 4px 20px rgba(0,0,0,0.5); z-index: 50; }
+        
+        /* Session */
+        .session-item { background: var(--surface); padding: 16px; border-radius: 12px; display: flex; gap: 16px; margin-bottom: 12px; }
+        .check-circle { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--text-muted); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .session-item.done .check-circle { background: var(--success); border-color: var(--success); color: black; }
         .session-item.done h3 { text-decoration: line-through; opacity: 0.5; }
-
+        
         /* Supersets */
         .superset-wrap { position: relative; }
         .link-bar { position: absolute; left: 15px; width: 4px; background: var(--primary); display: none; z-index: 0;}
         .is-linked-start { margin-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-        .is-linked-start + .link-bar { display: block; top: 40px; bottom: -20px; } /* Connects down */
-        
+        .is-linked-start + .link-bar { display: block; top: 40px; bottom: -20px; }
         .is-linked-mid { margin: 0; border-radius: 0; border-top: 1px solid #333; }
         .is-linked-mid + .link-bar { display: block; top: -20px; bottom: -20px; }
-        
         .is-linked-end { margin-top: 0; border-top-left-radius: 0; border-top-right-radius: 0; border-top: 1px solid #333; }
         .is-linked-end + .link-bar { display: block; top: -20px; bottom: 40px; }
-
-        /* --- MODALS --- */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: none; align-items: flex-end; }
-        .modal.open { display: flex; }
-        .modal-pane { background: #1a1a1a; width: 100%; border-radius: 24px 24px 0 0; padding: 24px; animation: slideUp 0.3s ease; max-height: 90vh; overflow-y: auto; }
-        
-        @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
-
-        .input-group { margin-bottom: 20px; }
-        .label { display: block; color: var(--text-muted); font-size: 12px; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; }
-        .input-text { width: 100%; background: #333; border: none; padding: 14px; border-radius: 12px; color: white; font-size: 16px; }
-        
-        .tag-selector { display: flex; gap: 8px; }
-        .tag-btn { flex: 1; padding: 12px; background: #333; border-radius: 8px; border: 1px solid transparent; color: #aaa; font-weight: 600; text-align: center; }
-        .tag-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
-
-        /* FAB */
-        .fab {
-            position: fixed; bottom: 30px; right: 20px; background: var(--primary); color: #000;
-            padding: 16px 24px; border-radius: 50px; font-weight: 700; font-size: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5); z-index: 50; display: flex; align-items: center; gap: 8px;
-        }
-
-        .delete-btn { color: #cf6679; font-size: 13px; text-decoration: underline; margin-top: 8px; background: none; border: none; padding: 0; }
-
     </style>
 </head>
 <body>
 
+    <div id="loader">
+        <div class="spinner"></div>
+        <div style="color:white; font-weight:600;">Syncing Cloud...</div>
+    </div>
+
     <div id="screen-home" class="screen">
         <div class="header-date" id="dateDisplay"></div>
-
-        <div class="weight-card">
-            <span style="font-weight: 600; color: var(--text-muted);">WEIGH IN</span>
-            <div class="flex-row">
-                <input type="number" id="weightInput" class="weight-input" placeholder="---" onblur="saveWeight()">
-                <span style="font-weight: 600; color: var(--text-muted); margin-left: 8px;">lbs</span>
-            </div>
+        
+        <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:600; color:var(--text-muted);">WEIGH IN (LBS)</span>
+            <input type="number" id="weightInput" style="background:transparent; border:none; color:var(--primary); font-size:32px; font-weight:700; width:100px; text-align:right;" placeholder="---" onblur="saveWeight()">
         </div>
 
-        <h3 style="color: var(--text-muted); font-size: 13px; letter-spacing: 1px; margin-bottom: 16px;">START WORKOUT</h3>
-        <div class="day-grid">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:30px;">
             <button class="day-btn" onclick="openMenu('Push')">Push</button>
             <button class="day-btn" onclick="openMenu('Pull')">Pull</button>
             <button class="day-btn" onclick="openMenu('Legs')">Legs</button>
             <button class="day-btn" onclick="openMenu('Core')">Core</button>
         </div>
-
-        <button class="manage-link btn-reset" onclick="openManage()">Manage Database & Exercises</button>
         
-        <div id="activeSessionBanner" class="hidden" style="text-align: center; margin-top: 20px;">
-            <button class="btn-reset" style="color: var(--success); border: 1px solid var(--success); padding: 8px 16px; border-radius: 20px;" onclick="resumeSession()">
-                Resume Active Workout
-            </button>
-        </div>
+        <button class="btn-reset" onclick="openManage()" style="text-align:center; color:var(--text-muted); text-decoration:underline; padding:20px;">Manage Database</button>
     </div>
 
     <div id="screen-menu" class="screen hidden">
-        <div class="top-bar">
-            <button class="btn-reset" onclick="goHome()" style="font-size: 24px;">←</button>
-            <h2 class="page-title" id="menuTitle">Push</h2>
-            <div style="width: 24px;"></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+            <button class="btn-reset" onclick="goHome()" style="font-size:24px;">←</button>
+            <h2 style="margin:0;" id="menuTitle">Push</h2>
+            <div style="width:24px;"></div>
         </div>
-
-        <div id="menuList" class="list-container"></div>
-        <div style="height: 80px;"></div> <button class="fab btn-reset" onclick="startSession()">
-            START <span id="selCount" style="background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 10px; font-size: 14px;">0</span>
-        </button>
+        <div id="menuList"></div>
+        <button class="fab btn-reset" onclick="startSession()">START <span id="selCount" style="background:rgba(0,0,0,0.2); padding:2px 8px; border-radius:10px;">0</span></button>
     </div>
 
     <div id="screen-session" class="screen hidden">
-        <div class="top-bar">
-            <button class="btn-reset" style="font-size: 14px; color: var(--text-muted);" onclick="goHome()">Hide</button>
-            <h2 class="page-title" style="font-size: 18px;">Workout</h2>
-            <button class="btn-reset" style="font-size: 16px; color: var(--success); font-weight: bold;" onclick="finishSession()">FINISH</button>
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+            <button class="btn-reset" onclick="goHome()" style="color:var(--text-muted);">Hide</button>
+            <button class="btn-reset" onclick="finishSession()" style="color:var(--success); font-weight:bold;">FINISH</button>
         </div>
-
-        <div id="sessionList" class="list-container"></div>
+        <div id="sessionList"></div>
     </div>
 
     <div id="screen-manage" class="screen hidden">
-        <div class="top-bar">
-            <button class="btn-reset" onclick="goHome()" style="font-size: 24px;">←</button>
-            <h2 class="page-title">Database</h2>
-            <div style="width: 24px;"></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+            <button class="btn-reset" onclick="goHome()" style="font-size:24px;">←</button>
+            <h2 style="margin:0;">Database</h2>
+            <button class="btn-reset" onclick="openAddModal()" style="color:var(--primary); font-size:24px;">+</button>
         </div>
-
-        <button class="btn-reset" style="width: 100%; padding: 16px; background: var(--surface-alt); border-radius: 12px; color: var(--primary); font-weight: bold; margin-bottom: 20px;" onclick="openAddModal()">
-            + Add New Exercise
-        </button>
-
-        <div id="manageList" class="list-container"></div>
+        <div id="manageList"></div>
     </div>
 
     <div id="modal-add" class="modal">
         <div class="modal-pane">
-            <div class="top-bar">
-                <h2 class="page-title">Add Exercise</h2>
-                <button class="btn-reset" onclick="closeModal('modal-add')">✕</button>
+            <h2 style="margin-top:0;">Add Exercise</h2>
+            <input type="text" id="addName" class="input-text" placeholder="Exercise Name">
+            <input type="text" id="addNotes" class="input-text" placeholder="Notes / Muscle Group">
+            <div style="display:flex; gap:8px; margin-bottom:20px;">
+                <button class="btn-reset tag" onclick="this.classList.toggle('selected')" data-val="Push" style="padding:12px; flex:1; text-align:center; background:#333;">Push</button>
+                <button class="btn-reset tag" onclick="this.classList.toggle('selected')" data-val="Pull" style="padding:12px; flex:1; text-align:center; background:#333;">Pull</button>
+                <button class="btn-reset tag" onclick="this.classList.toggle('selected')" data-val="Legs" style="padding:12px; flex:1; text-align:center; background:#333;">Legs</button>
+                <button class="btn-reset tag" onclick="this.classList.toggle('selected')" data-val="Core" style="padding:12px; flex:1; text-align:center; background:#333;">Core</button>
             </div>
-
-            <div class="input-group">
-                <label class="label">Exercise Name</label>
-                <input type="text" id="addName" class="input-text" placeholder="e.g. Bench Press">
-            </div>
-
-            <div class="input-group">
-                <label class="label">Tag Days (Select all that apply)</label>
-                <div class="tag-selector">
-                    <button class="btn-reset tag-btn" onclick="toggleTag(this)" data-val="Push">Push</button>
-                    <button class="btn-reset tag-btn" onclick="toggleTag(this)" data-val="Pull">Pull</button>
-                    <button class="btn-reset tag-btn" onclick="toggleTag(this)" data-val="Legs">Legs</button>
-                    <button class="btn-reset tag-btn" onclick="toggleTag(this)" data-val="Core">Core</button>
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label class="label">Notes / Muscle</label>
-                <input type="text" id="addNotes" class="input-text" placeholder="e.g. Chest, Heavy">
-            </div>
-
-            <button class="btn-reset" style="width: 100%; padding: 16px; background: var(--primary); border-radius: 12px; color: #000; font-weight: bold; font-size: 16px;" onclick="saveExercise()">
-                Save Exercise
-            </button>
+            <button class="btn-reset" onclick="saveExercise()" style="width:100%; background:var(--primary); padding:16px; border-radius:12px; color:black; font-weight:bold;">Save</button>
+            <button class="btn-reset" onclick="document.getElementById('modal-add').classList.remove('open')" style="width:100%; padding:16px; margin-top:10px; color:var(--text-muted);">Cancel</button>
         </div>
     </div>
 
     <script>
-        // --- DATA LAYER ---
-        const DAYS = ['Push', 'Pull', 'Legs', 'Core'];
-        let exercises = JSON.parse(localStorage.getItem('jb_exercises')) || [];
-        let activeSession = JSON.parse(localStorage.getItem('jb_session')) || null;
-        let weightLog = JSON.parse(localStorage.getItem('jb_weight')) || {};
-        
+        // ==========================================
+        //  ⚠️ PASTE YOUR GOOGLE SHEET URL HERE
+        // ==========================================
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzoEunDp33IT-AGGp9foxIRs8ps7IESMDPxz0B7p2_AWZT4Uu5jJZSG5CxIHg9xGww4Jw/exec'; 
+
+        // STATE
+        let db = { exercises: [], history: [], weight: {} };
+        let activeSession = null;
         let selectedIds = new Set();
-        let currentFilter = '';
-
-        // --- INIT ---
         const todayKey = new Date().toISOString().split('T')[0];
-        document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-        if(weightLog[todayKey]) document.getElementById('weightInput').value = weightLog[todayKey];
-        if(activeSession) document.getElementById('activeSessionBanner').classList.remove('hidden');
 
-        // --- NAVIGATION ---
+        // --- CLOUD SYNC ---
+        async function syncData() {
+            if(API_URL.includes('PASTE')) return alert("Please add your API URL in the code!");
+            document.getElementById('loader').classList.remove('hidden');
+            try {
+                const res = await fetch(API_URL);
+                db = await res.json();
+                renderApp();
+            } catch(e) { alert("Sync Failed: " + e); }
+            document.getElementById('loader').classList.add('hidden');
+        }
+
+        async function postData(action, payload) {
+            // Optimistic UI update happens in caller
+            fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors', // standard for GAS
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action, payload })
+            });
+        }
+
+        // --- CORE UI ---
+        function init() {
+            document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+            syncData();
+        }
+
+        function renderApp() {
+            if(db.weight[todayKey]) document.getElementById('weightInput').value = db.weight[todayKey];
+            renderManage();
+        }
+
         function goHome() {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById('screen-home').classList.remove('hidden');
-            if(activeSession) document.getElementById('activeSessionBanner').classList.remove('hidden');
         }
 
-        // --- WEIGHT ---
+        // --- ACTIONS ---
         function saveWeight() {
             const val = document.getElementById('weightInput').value;
-            if(val) {
-                weightLog[todayKey] = val;
-                localStorage.setItem('jb_weight', JSON.stringify(weightLog));
-            }
+            if(!val) return;
+            db.weight[todayKey] = val;
+            postData('log_weight', { date: todayKey, value: val });
         }
 
-        // --- MENU / BUILDER ---
+        function saveExercise() {
+            const name = document.getElementById('addName').value;
+            const notes = document.getElementById('addNotes').value;
+            const tags = Array.from(document.querySelectorAll('#modal-add .tag.selected')).map(el => el.dataset.val);
+            
+            if(!name || tags.length === 0) return alert("Name and at least 1 Day required");
+
+            const newEx = { id: Date.now(), name, notes, tags };
+            db.exercises.push(newEx);
+            
+            postData('save_exercise', db.exercises); // Send full list
+            document.getElementById('modal-add').classList.remove('open');
+            renderManage();
+        }
+
+        function deleteExercise(id) {
+            if(!confirm("Delete?")) return;
+            db.exercises = db.exercises.filter(e => e.id !== id);
+            postData('save_exercise', db.exercises);
+            renderManage();
+        }
+
+        function finishSession() {
+            if(!confirm("Finish Workout?")) return;
+            activeSession.endTime = Date.now();
+            
+            // Log to local state & Cloud
+            db.history.push(activeSession);
+            postData('log_workout', activeSession);
+            
+            activeSession = null;
+            goHome();
+        }
+
+        // --- BUILDER / SESSION ---
         function openMenu(day) {
-            currentFilter = day;
             selectedIds.clear();
             document.getElementById('selCount').textContent = '0';
             document.getElementById('menuTitle').textContent = day;
-            
-            const list = document.getElementById('menuList');
-            
-            // Filter: Show exercises that contain the tag 'day'
-            const filtered = exercises.filter(ex => ex.tags && ex.tags.includes(day));
-            
-            // Render
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById('screen-menu').classList.remove('hidden');
-
-            if (filtered.length === 0) {
-                list.innerHTML = `
-                    <div style="text-align:center; padding: 40px; color: var(--text-muted);">
-                        No exercises tagged "${day}".<br>
-                        <button class="btn-reset" onclick="openManage()" style="color:var(--primary); text-decoration:underline; margin-top:10px;">Add some now</button>
-                    </div>`;
-                return;
-            }
-
+            
+            const list = document.getElementById('menuList');
+            const filtered = db.exercises.filter(e => e.tags.includes(day));
+            
             list.innerHTML = filtered.map(ex => `
                 <div class="item-card" id="card-${ex.id}" onclick="toggleSelect(${ex.id})">
-                    <div class="item-info">
-                        <h3>${ex.name}</h3>
-                        <div class="item-tags">
-                            ${ex.notes ? `<span class="tag" style="background:#444">${ex.notes}</span>` : ''}
-                            ${ex.tags.map(t => `<span class="tag ${t==='Core'?'core':''}">${t}</span>`).join('')}
-                        </div>
+                    <div>
+                        <h3 style="margin:0;">${ex.name}</h3>
+                        <div style="font-size:12px; color:#888; margin-top:4px;">${ex.notes || ''}</div>
                     </div>
-                    <div style="font-size: 20px;">
-                        <span id="check-${ex.id}">⬜</span>
-                    </div>
+                    <span id="check-${ex.id}" style="font-size:20px;">⬜</span>
                 </div>
             `).join('');
         }
 
         function toggleSelect(id) {
-            const card = document.getElementById(`card-${id}`);
-            const check = document.getElementById(`check-${id}`);
-            
-            if (selectedIds.has(id)) {
+            if(selectedIds.has(id)) {
                 selectedIds.delete(id);
-                card.classList.remove('selected');
-                check.textContent = '⬜';
+                document.getElementById('card-'+id).classList.remove('selected');
+                document.getElementById('check-'+id).textContent = '⬜';
             } else {
                 selectedIds.add(id);
-                card.classList.add('selected');
-                check.textContent = '✅';
+                document.getElementById('card-'+id).classList.add('selected');
+                document.getElementById('check-'+id).textContent = '✅';
             }
             document.getElementById('selCount').textContent = selectedIds.size;
         }
 
-        // --- MANAGE / ADD ---
-        function openManage() {
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            document.getElementById('screen-manage').classList.remove('hidden');
-            renderManageList();
-        }
-
-        function renderManageList() {
-            const list = document.getElementById('manageList');
-            list.innerHTML = exercises.map((ex, idx) => `
-                <div class="item-card">
-                    <div class="item-info">
-                        <h3>${ex.name}</h3>
-                        <div class="item-tags">
-                            ${ex.tags.map(t => `<span class="tag">${t}</span>`).join('')}
-                        </div>
-                    </div>
-                    <button class="delete-btn" onclick="deleteExercise(${idx})">Delete</button>
-                </div>
-            `).join('');
-        }
-
-        function openAddModal() {
-            document.getElementById('modal-add').classList.add('open');
-            document.getElementById('addName').value = '';
-            document.getElementById('addNotes').value = '';
-            document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
-        }
-
-        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-        function toggleTag(btn) { btn.classList.toggle('active'); }
-
-        function saveExercise() {
-            const name = document.getElementById('addName').value;
-            const notes = document.getElementById('addNotes').value;
-            const tags = Array.from(document.querySelectorAll('.tag-btn.active')).map(b => b.dataset.val);
-
-            if (!name) return alert("Name is required");
-            if (tags.length === 0) return alert("Select at least one day");
-
-            exercises.push({
-                id: Date.now(),
-                name,
-                notes,
-                tags
-            });
-            localStorage.setItem('jb_exercises', JSON.stringify(exercises));
-            
-            closeModal('modal-add');
-            renderManageList();
-        }
-
-        function deleteExercise(idx) {
-            if(confirm("Delete this exercise?")) {
-                exercises.splice(idx, 1);
-                localStorage.setItem('jb_exercises', JSON.stringify(exercises));
-                renderManageList();
-            }
-        }
-
-        // --- SESSION LOGIC ---
         function startSession() {
-            if (selectedIds.size === 0) return;
-            
-            // Build session items
-            const sessionItems = exercises
-                .filter(ex => selectedIds.has(ex.id))
-                .map(ex => ({ ...ex, done: false, linked: false }));
-
+            if(selectedIds.size === 0) return;
             activeSession = {
-                startTime: Date.now(),
-                items: sessionItems
+                id: Date.now(),
+                date: new Date().toISOString(),
+                items: db.exercises.filter(e => selectedIds.has(e.id)).map(e => ({...e, done:false, linked:false}))
             };
-            localStorage.setItem('jb_session', JSON.stringify(activeSession));
-            
-            renderSession();
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            document.getElementById('screen-session').classList.remove('hidden');
-        }
-
-        function resumeSession() {
-            if(!activeSession) return;
             renderSession();
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById('screen-session').classList.remove('hidden');
@@ -413,59 +267,68 @@
 
         function renderSession() {
             const list = document.getElementById('sessionList');
-            
             list.innerHTML = activeSession.items.map((item, i) => {
-                // Link Logic visual
-                const prevLinked = i > 0 && activeSession.items[i-1].linked;
-                const currLinked = item.linked;
-                
-                let linkClass = '';
-                if(currLinked && !prevLinked) linkClass = 'is-linked-start';
-                else if(currLinked && prevLinked) linkClass = 'is-linked-mid';
-                else if(!currLinked && prevLinked) linkClass = 'is-linked-end';
+                // Link Logic
+                const prev = i > 0 && activeSession.items[i-1].linked;
+                const curr = item.linked;
+                let cls = '';
+                if(curr && !prev) cls = 'is-linked-start';
+                else if(curr && prev) cls = 'is-linked-mid';
+                else if(!curr && prev) cls = 'is-linked-end';
 
                 return `
                 <div class="superset-wrap">
-                    <div class="session-item ${item.done ? 'done' : ''} ${linkClass}">
-                        <div class="check-circle" onclick="toggleDone(${i})">
-                            ${item.done ? '✓' : ''}
-                        </div>
+                    <div class="session-item ${item.done?'done':''} ${cls}">
+                        <div class="check-circle" onclick="toggleDone(${i})">${item.done?'✓':''}</div>
                         <div style="flex:1">
-                            <h3 style="margin:0; font-size:16px;">${item.name}</h3>
-                            <div style="color:var(--text-muted); font-size:13px; margin-top:4px;">${item.notes || item.tags.join(', ')}</div>
-                            <button class="btn-reset" style="font-size:12px; color:${item.linked ? 'var(--primary)' : '#555'}; margin-top:8px; font-weight:bold;" onclick="toggleLink(${i})">
+                            <h3 style="margin:0;">${item.name}</h3>
+                            <div style="font-size:12px; color:#888;">${item.notes}</div>
+                            <div onclick="toggleLink(${i})" style="font-size:12px; font-weight:bold; color:${item.linked?'var(--primary)':'#555'}; margin-top:8px;">
                                 ${item.linked ? '🔗 UNLINK' : '🔗 SUPERSET'}
-                            </button>
+                            </div>
                         </div>
                     </div>
                     <div class="link-bar"></div>
-                </div>
-                `;
+                </div>`;
             }).join('');
         }
 
-        function toggleDone(idx) {
-            activeSession.items[idx].done = !activeSession.items[idx].done;
-            localStorage.setItem('jb_session', JSON.stringify(activeSession));
+        function toggleDone(i) {
+            activeSession.items[i].done = !activeSession.items[i].done;
+            renderSession();
+        }
+        function toggleLink(i) {
+            if(i === activeSession.items.length-1) return;
+            activeSession.items[i].linked = !activeSession.items[i].linked;
             renderSession();
         }
 
-        function toggleLink(idx) {
-            if(idx === activeSession.items.length - 1) return; // Can't link last item
-            activeSession.items[idx].linked = !activeSession.items[idx].linked;
-            localStorage.setItem('jb_session', JSON.stringify(activeSession));
-            renderSession();
+        function renderManage() {
+            const list = document.getElementById('manageList');
+            list.innerHTML = db.exercises.map(ex => `
+                <div class="item-card">
+                    <div>
+                        <h3 style="margin:0;">${ex.name}</h3>
+                        <div style="font-size:10px; margin-top:4px;">${ex.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+                    </div>
+                    <button class="btn-reset" onclick="deleteExercise(${ex.id})" style="color:var(--danger);">Delete</button>
+                </div>
+            `).join('');
+        }
+        
+        function openManage() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('screen-manage').classList.remove('hidden');
+        }
+        
+        function openAddModal() {
+            document.getElementById('addName').value = '';
+            document.getElementById('addNotes').value = '';
+            document.querySelectorAll('#modal-add .tag').forEach(el => el.classList.remove('selected'));
+            document.getElementById('modal-add').classList.add('open');
         }
 
-        function finishSession() {
-            if(confirm("Finish Workout?")) {
-                activeSession = null;
-                localStorage.removeItem('jb_session');
-                goHome();
-                document.getElementById('activeSessionBanner').classList.add('hidden');
-            }
-        }
-
+        init();
     </script>
 </body>
 </html>
