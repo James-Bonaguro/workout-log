@@ -32,7 +32,10 @@
         
         .item-card { background: var(--surface); padding: 16px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; border: 2px solid transparent; }
         .item-card.selected { border-color: var(--primary); background: rgba(187,134,252,0.05); }
-        .tag { font-size: 10px; background: #333; padding: 3px 8px; border-radius: 4px; color: #ccc; font-weight: 600; text-transform: uppercase; margin-right: 4px; }
+        .tag { font-size: 10px; background: #333; padding: 4px 10px; border-radius: 4px; color: #ccc; font-weight: 600; text-transform: uppercase; margin-right: 4px; }
+        
+        /* THIS WAS MISSING BEFORE: */
+        .tag.selected { background: var(--primary); color: black; }
         
         /* Modal & Inputs */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: none; align-items: flex-end; }
@@ -128,9 +131,9 @@
 
     <script>
         // ==========================================
-        //  ⚠️ PASTE YOUR GOOGLE SHEET URL HERE
+        //  YOUR URL IS PRE-FILLED BELOW
         // ==========================================
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzoEunDp33IT-AGGp9foxIRs8ps7IESMDPxz0B7p2_AWZT4Uu5jJZSG5CxIHg9xGww4Jw/exec'; 
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzoEunDp33IT-AGGp9foxIRs8ps7IESMDPxz0B7p2_AWZT4Uu5jJZSG5CxIHg9xGww4Jw/exec';
 
         // STATE
         let db = { exercises: [], history: [], weight: {} };
