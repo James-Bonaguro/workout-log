@@ -8,12 +8,11 @@
         :root {
             --bg: #121212;
             --surface: #1e1e1e;
-            --surface-alt: #2c2c2c;
+            --surface-alt: #2d2d2d;
             --primary: #BB86FC;
-            --primary-var: #3700B3;
             --text: #e0e0e0;
             --text-muted: #a0a0a0;
-            --danger: #cf6679;
+            --border: #333;
             --success: #03dac6;
             --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             --safe-bottom: env(safe-area-inset-bottom);
@@ -22,498 +21,424 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
         
         body {
-            margin: 0;
-            padding: 0;
-            background: var(--bg);
-            color: var(--text);
-            font-family: var(--font);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
+            margin: 0; padding: 0; background: var(--bg); color: var(--text);
+            font-family: var(--font); height: 100vh; display: flex; flex-direction: column;
         }
 
-        /* UTILITIES */
+        /* --- UTILITIES --- */
         .hidden { display: none !important; }
         .btn-reset { background: none; border: none; color: inherit; font: inherit; cursor: pointer; padding: 0; }
-        .flex-col { display: flex; flex-direction: column; }
         .flex-row { display: flex; align-items: center; }
+        .flex-col { display: flex; flex-direction: column; }
         .gap-2 { gap: 8px; }
-        .gap-4 { gap: 16px; }
+        .w-full { width: 100%; }
 
-        /* HEADER */
-        header {
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .date-display { font-size: 28px; font-weight: 800; letter-spacing: -1px; }
-        .settings-btn { font-size: 24px; opacity: 0.7; }
-
-        /* SCREENS */
+        /* --- SCREENS & LAYOUT --- */
         .screen {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 0 20px 20px 20px;
-            overflow-y: auto;
-            transition: transform 0.2s ease;
+            flex: 1; display: flex; flex-direction: column; padding: 20px;
+            overflow-y: auto; padding-bottom: calc(20px + var(--safe-bottom));
         }
 
         /* --- HOME SCREEN --- */
-        .weight-input-container {
-            background: var(--surface);
-            padding: 16px;
-            border-radius: 16px;
-            margin-bottom: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .header-date { font-size: 32px; font-weight: 800; margin-bottom: 24px; letter-spacing: -1px; }
+
+        .weight-card {
+            background: var(--surface); border-radius: 16px; padding: 20px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;
+            border: 1px solid var(--border);
         }
         .weight-input {
-            background: transparent;
-            border: none;
-            color: var(--primary);
-            font-size: 32px;
-            font-weight: 700;
-            width: 100px;
-            text-align: right;
+            background: transparent; border: none; color: var(--primary);
+            font-size: 36px; font-weight: 700; width: 120px; text-align: right;
         }
         .weight-input:focus { outline: none; }
-        .unit { color: var(--text-muted); font-weight: 600; margin-left: 8px; }
 
-        .day-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
+        .day-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 40px; }
         .day-btn {
-            background: var(--surface-alt);
-            padding: 24px 16px;
-            border-radius: 16px;
-            font-size: 18px;
-            font-weight: 600;
-            text-align: center;
-            transition: transform 0.1s;
+            background: var(--surface-alt); padding: 30px 20px; border-radius: 16px;
+            font-size: 20px; font-weight: 600; text-align: center; border: 1px solid var(--border);
+            transition: transform 0.1s, background 0.2s;
         }
-        .day-btn:active { transform: scale(0.96); background: var(--primary-var); }
-        .day-btn.cardio { grid-column: span 2; background: #232323; color: var(--success); }
+        .day-btn:active { transform: scale(0.96); background: var(--primary); color: #000; }
 
-        /* --- BUILDER SCREEN --- */
-        .builder-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .search-bar {
-            width: 100%;
-            padding: 12px;
-            background: var(--surface);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            margin-bottom: 12px;
-            font-size: 16px;
+        .manage-link {
+            text-align: center; margin-top: auto; padding: 20px;
+            color: var(--text-muted); font-size: 14px; text-decoration: underline; opacity: 0.6;
         }
 
-        .db-list { display: flex; flex-direction: column; gap: 8px; padding-bottom: 80px; }
-        .db-item {
-            background: var(--surface);
-            padding: 16px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border: 2px solid transparent;
-        }
-        .db-item.selected {
-            border-color: var(--primary);
-            background: rgba(187, 134, 252, 0.1);
-        }
-        .db-info h3 { margin: 0 0 4px 0; font-size: 16px; }
-        .db-meta { color: var(--text-muted); font-size: 13px; }
-
-        .fab {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: var(--primary);
-            color: black;
-            padding: 16px 32px;
-            border-radius: 50px;
-            font-weight: 700;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            z-index: 100;
-        }
-
-        /* --- ACTIVE SESSION SCREEN --- */
-        .session-list { display: flex; flex-direction: column; gap: 12px; padding-bottom: 100px; }
+        /* --- SELECTION / DB SCREENS --- */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .page-title { font-size: 24px; font-weight: 700; margin: 0; }
         
-        .session-card-wrapper {
-            position: relative;
-            transition: all 0.3s ease;
-        }
+        .list-container { display: flex; flex-direction: column; gap: 10px; }
         
-        /* SUPERSET STYLING */
-        .session-card-wrapper.superset-start {
-            margin-bottom: 0;
-            border-bottom-left-radius: 0;
-            border-bottom-right-radius: 0;
+        .item-card {
+            background: var(--surface); padding: 16px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: space-between;
+            border: 2px solid transparent; transition: 0.2s;
         }
-        .session-card-wrapper.superset-start .session-card {
-            border-bottom-left-radius: 0;
-            border-bottom-right-radius: 0;
-            border-bottom: 1px solid #333;
-        }
-        .session-card-wrapper.superset-middle {
-            margin-top: 0;
-            margin-bottom: 0;
-            border-radius: 0;
-        }
-        .session-card-wrapper.superset-middle .session-card {
-            border-radius: 0;
-            border-bottom: 1px solid #333;
-        }
-        .session-card-wrapper.superset-end {
-            margin-top: 0;
-            border-top-left-radius: 0;
-            border-top-right-radius: 0;
-        }
-        .session-card-wrapper.superset-end .session-card {
-            border-top-left-radius: 0;
-            border-top-right-radius: 0;
-        }
+        .item-card.selected { border-color: var(--primary); background: rgba(187,134,252,0.05); }
+        
+        .item-info h3 { margin: 0 0 4px 0; font-size: 17px; }
+        .item-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+        .tag { font-size: 10px; background: #333; padding: 3px 8px; border-radius: 4px; color: #ccc; font-weight: 600; text-transform: uppercase; }
+        .tag.core { color: var(--success); }
 
-        /* Visual Link Bar */
-        .superset-link-bar {
-            position: absolute;
-            left: -12px;
-            top: 10px;
-            bottom: -14px;
-            width: 4px;
-            background: var(--primary);
-            border-radius: 4px;
-            display: none;
+        /* --- ACTIVE SESSION --- */
+        .session-item {
+            background: var(--surface); padding: 16px; border-radius: 12px;
+            display: flex; gap: 16px; align-items: flex-start;
         }
-        .superset-start .superset-link-bar { display: block; bottom: -14px; }
-        .superset-middle .superset-link-bar { display: block; top: -14px; bottom: -14px; }
-        .superset-end .superset-link-bar { display: block; top: -14px; bottom: 10px; }
-
-        .session-card {
-            background: var(--surface);
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            gap: 16px;
-        }
-
         .check-circle {
-            width: 28px;
-            height: 28px;
-            border: 2px solid var(--text-muted);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            margin-top: 2px;
+            width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--text-muted);
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
         }
-        .session-card.done .check-circle {
-            background: var(--success);
-            border-color: var(--success);
-            color: black;
-        }
-        .session-card.done h3 { text-decoration: line-through; opacity: 0.5; }
+        .session-item.done .check-circle { background: var(--success); border-color: var(--success); color: #000; font-weight: bold; }
+        .session-item.done h3 { text-decoration: line-through; opacity: 0.5; }
 
-        .card-content { flex: 1; }
-        .card-content h3 { margin: 0 0 6px 0; font-size: 17px; }
-        .badge {
-            display: inline-block;
-            background: #333;
-            color: var(--text-muted);
-            font-size: 11px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            font-weight: 700;
-        }
-        .notes-text {
-            font-size: 14px;
-            color: var(--text-muted);
-            background: rgba(255,255,255,0.05);
-            padding: 8px;
-            border-radius: 6px;
-            margin-top: 4px;
+        /* Supersets */
+        .superset-wrap { position: relative; }
+        .link-bar { position: absolute; left: 15px; width: 4px; background: var(--primary); display: none; z-index: 0;}
+        .is-linked-start { margin-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+        .is-linked-start + .link-bar { display: block; top: 40px; bottom: -20px; } /* Connects down */
+        
+        .is-linked-mid { margin: 0; border-radius: 0; border-top: 1px solid #333; }
+        .is-linked-mid + .link-bar { display: block; top: -20px; bottom: -20px; }
+        
+        .is-linked-end { margin-top: 0; border-top-left-radius: 0; border-top-right-radius: 0; border-top: 1px solid #333; }
+        .is-linked-end + .link-bar { display: block; top: -20px; bottom: 40px; }
+
+        /* --- MODALS --- */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: none; align-items: flex-end; }
+        .modal.open { display: flex; }
+        .modal-pane { background: #1a1a1a; width: 100%; border-radius: 24px 24px 0 0; padding: 24px; animation: slideUp 0.3s ease; max-height: 90vh; overflow-y: auto; }
+        
+        @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+
+        .input-group { margin-bottom: 20px; }
+        .label { display: block; color: var(--text-muted); font-size: 12px; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; }
+        .input-text { width: 100%; background: #333; border: none; padding: 14px; border-radius: 12px; color: white; font-size: 16px; }
+        
+        .tag-selector { display: flex; gap: 8px; }
+        .tag-btn { flex: 1; padding: 12px; background: #333; border-radius: 8px; border: 1px solid transparent; color: #aaa; font-weight: 600; text-align: center; }
+        .tag-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
+
+        /* FAB */
+        .fab {
+            position: fixed; bottom: 30px; right: 20px; background: var(--primary); color: #000;
+            padding: 16px 24px; border-radius: 50px; font-weight: 700; font-size: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5); z-index: 50; display: flex; align-items: center; gap: 8px;
         }
 
-        .action-row {
-            display: flex;
-            justify-content: flex-end;
-            padding-top: 8px;
-        }
-        .icon-btn {
-            font-size: 18px;
-            padding: 8px;
-            opacity: 0.5;
-        }
-        .icon-btn.active { opacity: 1; color: var(--primary); }
+        .delete-btn { color: #cf6679; font-size: 13px; text-decoration: underline; margin-top: 8px; background: none; border: none; padding: 0; }
 
-        /* SETTINGS MODAL */
-        .modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200;
-            display: none; align-items: center; justify-content: center; padding: 20px;
-        }
-        .modal-content {
-            background: var(--surface); width: 100%; max-width: 400px;
-            padding: 24px; border-radius: 16px;
-        }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="date-display" id="dateDisplay"></div>
-        <button class="btn-reset settings-btn" onclick="toggleSettings()">⚙️</button>
-    </header>
+    <div id="screen-home" class="screen">
+        <div class="header-date" id="dateDisplay"></div>
 
-    <div id="homeScreen" class="screen">
-        <div class="weight-input-container">
-            <span style="font-weight: 600; color: var(--text-muted);">BODY WEIGHT</span>
+        <div class="weight-card">
+            <span style="font-weight: 600; color: var(--text-muted);">WEIGH IN</span>
             <div class="flex-row">
                 <input type="number" id="weightInput" class="weight-input" placeholder="---" onblur="saveWeight()">
-                <span class="unit">lbs</span>
+                <span style="font-weight: 600; color: var(--text-muted); margin-left: 8px;">lbs</span>
             </div>
         </div>
 
-        <h3 style="color: var(--text-muted); margin-bottom: 16px; font-size: 14px; letter-spacing: 1px;">SELECT WORKOUT</h3>
+        <h3 style="color: var(--text-muted); font-size: 13px; letter-spacing: 1px; margin-bottom: 16px;">START WORKOUT</h3>
         <div class="day-grid">
-            <button class="btn-reset day-btn" onclick="openBuilder('Push')">Push</button>
-            <button class="btn-reset day-btn" onclick="openBuilder('Pull')">Pull</button>
-            <button class="btn-reset day-btn" onclick="openBuilder('Legs')">Legs</button>
-            <button class="btn-reset day-btn" onclick="openBuilder('Core')">Core</button>
-            <button class="btn-reset day-btn cardio" onclick="openBuilder('Cardio')">Cardio</button>
+            <button class="day-btn" onclick="openMenu('Push')">Push</button>
+            <button class="day-btn" onclick="openMenu('Pull')">Pull</button>
+            <button class="day-btn" onclick="openMenu('Legs')">Legs</button>
+            <button class="day-btn" onclick="openMenu('Core')">Core</button>
         </div>
+
+        <button class="manage-link btn-reset" onclick="openManage()">Manage Database & Exercises</button>
         
-        <div style="margin-top: 30px; text-align: center;">
-            <button class="btn-reset" style="color: var(--text-muted); font-size: 14px; text-decoration: underline;" onclick="resumeSession()">Resume Active Session</button>
+        <div id="activeSessionBanner" class="hidden" style="text-align: center; margin-top: 20px;">
+            <button class="btn-reset" style="color: var(--success); border: 1px solid var(--success); padding: 8px 16px; border-radius: 20px;" onclick="resumeSession()">
+                Resume Active Workout
+            </button>
         </div>
     </div>
 
-    <div id="builderScreen" class="screen hidden">
-        <div class="builder-header">
-            <button class="btn-reset" onclick="goHome()" style="font-size: 20px;">← Back</button>
-            <h2 id="builderTitle" style="margin: 0; font-size: 20px;">Push</h2>
+    <div id="screen-menu" class="screen hidden">
+        <div class="top-bar">
+            <button class="btn-reset" onclick="goHome()" style="font-size: 24px;">←</button>
+            <h2 class="page-title" id="menuTitle">Push</h2>
             <div style="width: 24px;"></div>
         </div>
 
-        <input type="text" class="search-bar" placeholder="Filter exercises..." onkeyup="filterBuilder(this.value)">
-
-        <div id="dbList" class="db-list">
-            </div>
-
-        <button class="btn-reset fab" onclick="startSession()">
-            <span>GO</span>
-            <span style="background:rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 10px;" id="selectedCount">0</span>
+        <div id="menuList" class="list-container"></div>
+        <div style="height: 80px;"></div> <button class="fab btn-reset" onclick="startSession()">
+            START <span id="selCount" style="background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 10px; font-size: 14px;">0</span>
         </button>
     </div>
 
-    <div id="sessionScreen" class="screen hidden">
-        <div class="builder-header">
-            <button class="btn-reset" onclick="goHome()" style="font-size: 16px; color: var(--text-muted);">Exit</button>
-            <h2 style="margin: 0; font-size: 18px; color: var(--primary);">Active Workout</h2>
-            <button class="btn-reset" onclick="finishSession()" style="font-size: 16px; color: var(--success);">Finish</button>
+    <div id="screen-session" class="screen hidden">
+        <div class="top-bar">
+            <button class="btn-reset" style="font-size: 14px; color: var(--text-muted);" onclick="goHome()">Hide</button>
+            <h2 class="page-title" style="font-size: 18px;">Workout</h2>
+            <button class="btn-reset" style="font-size: 16px; color: var(--success); font-weight: bold;" onclick="finishSession()">FINISH</button>
         </div>
 
-        <div id="sessionList" class="session-list">
-            </div>
+        <div id="sessionList" class="list-container"></div>
     </div>
 
-    <div id="settingsModal" class="modal">
-        <div class="modal-content">
-            <h2>Database</h2>
-            <p style="color: var(--text-muted); margin-bottom: 20px;">Import your CSV to populate the exercise lists.</p>
-            <input type="file" id="csvInput" accept=".csv" style="margin-bottom: 20px; width: 100%;">
-            <div style="text-align: right;">
-                <button class="btn-reset" style="padding: 10px 20px; background: var(--surface-alt); border-radius: 8px;" onclick="toggleSettings()">Close</button>
+    <div id="screen-manage" class="screen hidden">
+        <div class="top-bar">
+            <button class="btn-reset" onclick="goHome()" style="font-size: 24px;">←</button>
+            <h2 class="page-title">Database</h2>
+            <div style="width: 24px;"></div>
+        </div>
+
+        <button class="btn-reset" style="width: 100%; padding: 16px; background: var(--surface-alt); border-radius: 12px; color: var(--primary); font-weight: bold; margin-bottom: 20px;" onclick="openAddModal()">
+            + Add New Exercise
+        </button>
+
+        <div id="manageList" class="list-container"></div>
+    </div>
+
+    <div id="modal-add" class="modal">
+        <div class="modal-pane">
+            <div class="top-bar">
+                <h2 class="page-title">Add Exercise</h2>
+                <button class="btn-reset" onclick="closeModal('modal-add')">✕</button>
             </div>
-            <div style="margin-top: 20px; font-size: 12px; color: #555;">
-                <p>Database size: <span id="dbSize">0</span> exercises</p>
-                <button class="btn-reset" style="color: var(--danger);" onclick="clearData()">Reset All Data</button>
+
+            <div class="input-group">
+                <label class="label">Exercise Name</label>
+                <input type="text" id="addName" class="input-text" placeholder="e.g. Bench Press">
             </div>
+
+            <div class="input-group">
+                <label class="label">Tag Days (Select all that apply)</label>
+                <div class="tag-selector">
+                    <button class="btn-reset tag-btn" onclick="toggleTag(this)" data-val="Push">Push</button>
+                    <button class="btn-reset tag-btn" onclick="toggleTag(this)" data-val="Pull">Pull</button>
+                    <button class="btn-reset tag-btn" onclick="toggleTag(this)" data-val="Legs">Legs</button>
+                    <button class="btn-reset tag-btn" onclick="toggleTag(this)" data-val="Core">Core</button>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label class="label">Notes / Muscle</label>
+                <input type="text" id="addNotes" class="input-text" placeholder="e.g. Chest, Heavy">
+            </div>
+
+            <button class="btn-reset" style="width: 100%; padding: 16px; background: var(--primary); border-radius: 12px; color: #000; font-weight: bold; font-size: 16px;" onclick="saveExercise()">
+                Save Exercise
+            </button>
         </div>
     </div>
 
     <script>
-        // --- STATE ---
+        // --- DATA LAYER ---
+        const DAYS = ['Push', 'Pull', 'Legs', 'Core'];
         let exercises = JSON.parse(localStorage.getItem('jb_exercises')) || [];
-        let activeSession = JSON.parse(localStorage.getItem('jb_active_session')) || { items: [] };
+        let activeSession = JSON.parse(localStorage.getItem('jb_session')) || null;
         let weightLog = JSON.parse(localStorage.getItem('jb_weight')) || {};
-
-        const DATES = {
-            today: new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
-            key: new Date().toISOString().split('T')[0]
-        };
+        
+        let selectedIds = new Set();
+        let currentFilter = '';
 
         // --- INIT ---
-        document.getElementById('dateDisplay').textContent = DATES.today;
-        if(weightLog[DATES.key]) document.getElementById('weightInput').value = weightLog[DATES.key];
-        document.getElementById('dbSize').textContent = exercises.length;
+        const todayKey = new Date().toISOString().split('T')[0];
+        document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+        if(weightLog[todayKey]) document.getElementById('weightInput').value = weightLog[todayKey];
+        if(activeSession) document.getElementById('activeSessionBanner').classList.remove('hidden');
 
         // --- NAVIGATION ---
         function goHome() {
-            hideAll();
-            document.getElementById('homeScreen').classList.remove('hidden');
-        }
-
-        function hideAll() {
-            document.querySelectorAll('.screen').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('screen-home').classList.remove('hidden');
+            if(activeSession) document.getElementById('activeSessionBanner').classList.remove('hidden');
         }
 
         // --- WEIGHT ---
         function saveWeight() {
             const val = document.getElementById('weightInput').value;
             if(val) {
-                weightLog[DATES.key] = val;
+                weightLog[todayKey] = val;
                 localStorage.setItem('jb_weight', JSON.stringify(weightLog));
             }
         }
 
-        // --- BUILDER LOGIC ---
-        let currentBuilderDay = '';
-        let selectedExercises = new Set();
-
-        function openBuilder(day) {
-            currentBuilderDay = day;
-            selectedExercises.clear();
-            updateFab();
+        // --- MENU / BUILDER ---
+        function openMenu(day) {
+            currentFilter = day;
+            selectedIds.clear();
+            document.getElementById('selCount').textContent = '0';
+            document.getElementById('menuTitle').textContent = day;
             
-            document.getElementById('builderTitle').textContent = `${day} Menu`;
-            hideAll();
-            document.getElementById('builderScreen').classList.remove('hidden');
-
-            const list = document.getElementById('dbList');
+            const list = document.getElementById('menuList');
             
-            // Filter DB by Type (Muscle Group or Type column from CSV)
-            // Assumes 'days' array exists on exercise object
-            const dayExercises = exercises.filter(ex => 
-                ex.days && ex.days.includes(day)
-            );
+            // Filter: Show exercises that contain the tag 'day'
+            const filtered = exercises.filter(ex => ex.tags && ex.tags.includes(day));
+            
+            // Render
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('screen-menu').classList.remove('hidden');
 
-            if(dayExercises.length === 0) {
-                list.innerHTML = `<div style="text-align:center; color:#555; margin-top:40px;">No ${day} exercises found.<br>Import CSV in settings.</div>`;
+            if (filtered.length === 0) {
+                list.innerHTML = `
+                    <div style="text-align:center; padding: 40px; color: var(--text-muted);">
+                        No exercises tagged "${day}".<br>
+                        <button class="btn-reset" onclick="openManage()" style="color:var(--primary); text-decoration:underline; margin-top:10px;">Add some now</button>
+                    </div>`;
                 return;
             }
 
-            // Sort alphabetical
-            dayExercises.sort((a,b) => a.name.localeCompare(b.name));
-
-            list.innerHTML = dayExercises.map(ex => `
-                <div class="db-item" id="db-item-${ex.id}" onclick="toggleSelection(${ex.id})">
-                    <div class="db-info">
+            list.innerHTML = filtered.map(ex => `
+                <div class="item-card" id="card-${ex.id}" onclick="toggleSelect(${ex.id})">
+                    <div class="item-info">
                         <h3>${ex.name}</h3>
-                        <div class="db-meta">${ex.muscle || ''} • ${ex.notes ? 'Has notes' : ''}</div>
+                        <div class="item-tags">
+                            ${ex.notes ? `<span class="tag" style="background:#444">${ex.notes}</span>` : ''}
+                            ${ex.tags.map(t => `<span class="tag ${t==='Core'?'core':''}">${t}</span>`).join('')}
+                        </div>
                     </div>
-                    <div style="font-size:20px;">${selectedExercises.has(ex.id) ? '✅' : '⬜'}</div>
+                    <div style="font-size: 20px;">
+                        <span id="check-${ex.id}">⬜</span>
+                    </div>
                 </div>
             `).join('');
         }
 
-        function toggleSelection(id) {
-            if(selectedExercises.has(id)) selectedExercises.delete(id);
-            else selectedExercises.add(id);
+        function toggleSelect(id) {
+            const card = document.getElementById(`card-${id}`);
+            const check = document.getElementById(`check-${id}`);
             
-            const el = document.getElementById(`db-item-${id}`);
-            if(selectedExercises.has(id)) {
-                el.classList.add('selected');
-                el.querySelector('div:last-child').textContent = '✅';
+            if (selectedIds.has(id)) {
+                selectedIds.delete(id);
+                card.classList.remove('selected');
+                check.textContent = '⬜';
             } else {
-                el.classList.remove('selected');
-                el.querySelector('div:last-child').textContent = '⬜';
+                selectedIds.add(id);
+                card.classList.add('selected');
+                check.textContent = '✅';
             }
-            updateFab();
+            document.getElementById('selCount').textContent = selectedIds.size;
         }
 
-        function updateFab() {
-            document.getElementById('selectedCount').textContent = selectedExercises.size;
+        // --- MANAGE / ADD ---
+        function openManage() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('screen-manage').classList.remove('hidden');
+            renderManageList();
         }
 
-        function filterBuilder(text) {
-            const term = text.toLowerCase();
-            document.querySelectorAll('.db-item').forEach(el => {
-                const content = el.innerText.toLowerCase();
-                el.style.display = content.includes(term) ? 'flex' : 'none';
+        function renderManageList() {
+            const list = document.getElementById('manageList');
+            list.innerHTML = exercises.map((ex, idx) => `
+                <div class="item-card">
+                    <div class="item-info">
+                        <h3>${ex.name}</h3>
+                        <div class="item-tags">
+                            ${ex.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+                        </div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteExercise(${idx})">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        function openAddModal() {
+            document.getElementById('modal-add').classList.add('open');
+            document.getElementById('addName').value = '';
+            document.getElementById('addNotes').value = '';
+            document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+        function toggleTag(btn) { btn.classList.toggle('active'); }
+
+        function saveExercise() {
+            const name = document.getElementById('addName').value;
+            const notes = document.getElementById('addNotes').value;
+            const tags = Array.from(document.querySelectorAll('.tag-btn.active')).map(b => b.dataset.val);
+
+            if (!name) return alert("Name is required");
+            if (tags.length === 0) return alert("Select at least one day");
+
+            exercises.push({
+                id: Date.now(),
+                name,
+                notes,
+                tags
             });
+            localStorage.setItem('jb_exercises', JSON.stringify(exercises));
+            
+            closeModal('modal-add');
+            renderManageList();
+        }
+
+        function deleteExercise(idx) {
+            if(confirm("Delete this exercise?")) {
+                exercises.splice(idx, 1);
+                localStorage.setItem('jb_exercises', JSON.stringify(exercises));
+                renderManageList();
+            }
         }
 
         // --- SESSION LOGIC ---
         function startSession() {
-            if(selectedExercises.size === 0) return;
+            if (selectedIds.size === 0) return;
             
-            const selectedItems = exercises.filter(ex => selectedExercises.has(ex.id)).map(ex => ({
-                ...ex,
-                done: false,
-                isSuperset: false // Links to the NEXT item
-            }));
+            // Build session items
+            const sessionItems = exercises
+                .filter(ex => selectedIds.has(ex.id))
+                .map(ex => ({ ...ex, done: false, linked: false }));
 
             activeSession = {
                 startTime: Date.now(),
-                items: selectedItems
+                items: sessionItems
             };
-            saveSession();
+            localStorage.setItem('jb_session', JSON.stringify(activeSession));
+            
             renderSession();
-            hideAll();
-            document.getElementById('sessionScreen').classList.remove('hidden');
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('screen-session').classList.remove('hidden');
         }
 
         function resumeSession() {
-            if(activeSession.items.length > 0) {
-                renderSession();
-                hideAll();
-                document.getElementById('sessionScreen').classList.remove('hidden');
-            } else {
-                alert("No active session.");
-            }
+            if(!activeSession) return;
+            renderSession();
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('screen-session').classList.remove('hidden');
         }
 
         function renderSession() {
             const list = document.getElementById('sessionList');
             
-            list.innerHTML = activeSession.items.map((item, idx) => {
-                // Superset visual logic
-                let wrapperClass = '';
-                const prev = activeSession.items[idx-1];
-                const isLinked = item.isSuperset; // This item links to next
-                const isLinkedFromPrev = prev && prev.isSuperset;
-
-                if (isLinked && !isLinkedFromPrev) wrapperClass = 'superset-start';
-                else if (isLinked && isLinkedFromPrev) wrapperClass = 'superset-middle';
-                else if (!isLinked && isLinkedFromPrev) wrapperClass = 'superset-end';
+            list.innerHTML = activeSession.items.map((item, i) => {
+                // Link Logic visual
+                const prevLinked = i > 0 && activeSession.items[i-1].linked;
+                const currLinked = item.linked;
+                
+                let linkClass = '';
+                if(currLinked && !prevLinked) linkClass = 'is-linked-start';
+                else if(currLinked && prevLinked) linkClass = 'is-linked-mid';
+                else if(!currLinked && prevLinked) linkClass = 'is-linked-end';
 
                 return `
-                <div class="session-card-wrapper ${wrapperClass}">
-                    <div class="superset-link-bar"></div>
-                    <div class="session-card ${item.done ? 'done' : ''}">
-                        <div class="check-circle" onclick="toggleDone(${idx})">
+                <div class="superset-wrap">
+                    <div class="session-item ${item.done ? 'done' : ''} ${linkClass}">
+                        <div class="check-circle" onclick="toggleDone(${i})">
                             ${item.done ? '✓' : ''}
                         </div>
-                        <div class="card-content">
-                            <h3>${item.name}</h3>
-                            <span class="badge">${item.muscle || 'General'}</span>
-                            ${item.notes ? `<div class="notes-text">${item.notes}</div>` : ''}
-                            
-                            <div class="action-row">
-                                <button class="btn-reset icon-btn ${item.isSuperset ? 'active' : ''}" 
-                                        onclick="toggleSuperset(${idx})">
-                                    🔗 Link
-                                </button>
-                            </div>
+                        <div style="flex:1">
+                            <h3 style="margin:0; font-size:16px;">${item.name}</h3>
+                            <div style="color:var(--text-muted); font-size:13px; margin-top:4px;">${item.notes || item.tags.join(', ')}</div>
+                            <button class="btn-reset" style="font-size:12px; color:${item.linked ? 'var(--primary)' : '#555'}; margin-top:8px; font-weight:bold;" onclick="toggleLink(${i})">
+                                ${item.linked ? '🔗 UNLINK' : '🔗 SUPERSET'}
+                            </button>
                         </div>
                     </div>
+                    <div class="link-bar"></div>
                 </div>
                 `;
             }).join('');
@@ -521,99 +446,26 @@
 
         function toggleDone(idx) {
             activeSession.items[idx].done = !activeSession.items[idx].done;
-            saveSession();
+            localStorage.setItem('jb_session', JSON.stringify(activeSession));
             renderSession();
         }
 
-        function toggleSuperset(idx) {
-            // Cannot link the last item
-            if(idx === activeSession.items.length - 1) return;
-            
-            activeSession.items[idx].isSuperset = !activeSession.items[idx].isSuperset;
-            saveSession();
+        function toggleLink(idx) {
+            if(idx === activeSession.items.length - 1) return; // Can't link last item
+            activeSession.items[idx].linked = !activeSession.items[idx].linked;
+            localStorage.setItem('jb_session', JSON.stringify(activeSession));
             renderSession();
-        }
-
-        function saveSession() {
-            localStorage.setItem('jb_active_session', JSON.stringify(activeSession));
         }
 
         function finishSession() {
-            if(confirm("Finish workout?")) {
-                activeSession = { items: [] };
-                saveSession();
+            if(confirm("Finish Workout?")) {
+                activeSession = null;
+                localStorage.removeItem('jb_session');
                 goHome();
+                document.getElementById('activeSessionBanner').classList.add('hidden');
             }
         }
 
-        // --- IMPORT LOGIC ---
-        function toggleSettings() {
-            const el = document.getElementById('settingsModal');
-            el.style.display = el.style.display === 'flex' ? 'none' : 'flex';
-        }
-
-        document.getElementById('csvInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                parseCSV(evt.target.result);
-                document.getElementById('settingsModal').style.display = 'none';
-            };
-            reader.readAsText(file);
-        });
-
-        function parseCSV(text) {
-            const lines = text.split(/\r\n|\n/).filter(l => l.trim());
-            const headers = lines[0].toLowerCase().split(',');
-            
-            // Expected: Exercise, Type, Muscle, Notes
-            const map = {
-                name: headers.findIndex(h => h.includes('exercise')),
-                type: headers.findIndex(h => h.includes('type')),
-                muscle: headers.findIndex(h => h.includes('muscle')),
-                notes: headers.findIndex(h => h.includes('note'))
-            };
-
-            const newExs = [];
-            for(let i=1; i<lines.length; i++) {
-                // Regex to handle quoted CSV cells
-                const row = lines[i].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
-                if(!row) continue;
-                const clean = row.map(s => s.replace(/^"|"$/g, '').trim());
-                
-                if(map.name === -1 || !clean[map.name]) continue;
-
-                // Map Types to Days
-                const typeStr = (clean[map.type] || '').toLowerCase();
-                const days = [];
-                if(typeStr.includes('push')) days.push('Push');
-                if(typeStr.includes('pull')) days.push('Pull');
-                if(typeStr.includes('legs')) days.push('Legs');
-                if(typeStr.includes('core')) days.push('Core');
-                if(typeStr.includes('cardio') || typeStr.includes('run')) days.push('Cardio');
-
-                newExs.push({
-                    id: Date.now() + i,
-                    name: clean[map.name],
-                    days: days,
-                    muscle: clean[map.muscle] || '',
-                    notes: clean[map.notes] || ''
-                });
-            }
-
-            exercises = newExs;
-            localStorage.setItem('jb_exercises', JSON.stringify(exercises));
-            document.getElementById('dbSize').textContent = exercises.length;
-            alert(`Imported ${exercises.length} exercises.`);
-        }
-
-        function clearData() {
-            if(confirm("Clear all data?")) {
-                localStorage.clear();
-                location.reload();
-            }
-        }
     </script>
 </body>
 </html>
