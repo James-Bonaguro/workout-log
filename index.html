@@ -33,8 +33,6 @@
         .item-card { background: var(--surface); padding: 16px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; border: 2px solid transparent; }
         .item-card.selected { border-color: var(--primary); background: rgba(187,134,252,0.05); }
         .tag { font-size: 10px; background: #333; padding: 4px 10px; border-radius: 4px; color: #ccc; font-weight: 600; text-transform: uppercase; margin-right: 4px; }
-        
-        /* THIS WAS MISSING BEFORE: */
         .tag.selected { background: var(--primary); color: black; }
         
         /* Modal & Inputs */
@@ -42,17 +40,21 @@
         .modal.open { display: flex; }
         .modal-pane { background: #1a1a1a; width: 100%; border-radius: 24px 24px 0 0; padding: 24px; max-height: 90vh; overflow-y: auto; }
         .input-text { width: 100%; background: #333; border: none; padding: 14px; border-radius: 12px; color: white; font-size: 16px; margin-bottom: 16px; }
+        .input-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; display: block; font-weight: 600; }
         .fab { position: fixed; bottom: 30px; right: 20px; background: var(--primary); color: #000; padding: 16px 24px; border-radius: 50px; font-weight: 700; box-shadow: 0 4px 20px rgba(0,0,0,0.5); z-index: 50; }
         
         /* Session */
-        .session-item { background: var(--surface); padding: 16px; border-radius: 12px; display: flex; gap: 16px; margin-bottom: 12px; }
+        .session-item { background: var(--surface); padding: 16px; border-radius: 12px; display: flex; gap: 16px; margin-bottom: 12px; position: relative; }
         .check-circle { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--text-muted); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .session-item.done .check-circle { background: var(--success); border-color: var(--success); color: black; }
         .session-item.done h3 { text-decoration: line-through; opacity: 0.5; }
         
+        .reorder-controls { display: flex; flex-direction: column; justify-content: center; gap: 8px; margin-right: 8px; }
+        .reorder-btn { background: #333; color: var(--text-muted); width: 30px; height: 30px; border-radius: 8px; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+
         /* Supersets */
         .superset-wrap { position: relative; }
-        .link-bar { position: absolute; left: 15px; width: 4px; background: var(--primary); display: none; z-index: 0;}
+        .link-bar { position: absolute; left: 63px; width: 4px; background: var(--primary); display: none; z-index: 0; } /* Adjusted left for reorder controls */
         .is-linked-start { margin-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
         .is-linked-start + .link-bar { display: block; top: 40px; bottom: -20px; }
         .is-linked-mid { margin: 0; border-radius: 0; border-top: 1px solid #333; }
@@ -99,10 +101,10 @@
     <div id="screen-session" class="screen hidden">
         <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
             <button class="btn-reset" onclick="goHome()" style="color:var(--text-muted);">Hide</button>
-            <button class="btn-reset" onclick="finishSession()" style="color:var(--success); font-weight:bold;">FINISH</button>
+            <button class="btn-reset" onclick="openFinishModal()" style="color:var(--success); font-weight:bold;">FINISH</button>
         </div>
         <div id="sessionList"></div>
-    </div>
+        <div style="height:100px;"></div> </div>
 
     <div id="screen-manage" class="screen hidden">
         <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
@@ -126,6 +128,29 @@
             </div>
             <button class="btn-reset" onclick="saveExercise()" style="width:100%; background:var(--primary); padding:16px; border-radius:12px; color:black; font-weight:bold;">Save</button>
             <button class="btn-reset" onclick="document.getElementById('modal-add').classList.remove('open')" style="width:100%; padding:16px; margin-top:10px; color:var(--text-muted);">Cancel</button>
+        </div>
+    </div>
+
+    <div id="modal-finish" class="modal">
+        <div class="modal-pane">
+            <h2 style="margin-top:0;">Workout Complete</h2>
+            
+            <label class="input-label">NOTES / SUMMARY</label>
+            <textarea id="finishNotes" class="input-text" rows="3" placeholder="How was the lift?"></textarea>
+            
+            <div style="display:flex; gap:16px;">
+                <div style="flex:1;">
+                    <label class="input-label">CALORIES</label>
+                    <input type="number" id="finishCals" class="input-text" placeholder="0">
+                </div>
+                <div style="flex:1;">
+                    <label class="input-label">DURATION (MIN)</label>
+                    <input type="number" id="finishDuration" class="input-text" placeholder="0">
+                </div>
+            </div>
+
+            <button class="btn-reset" onclick="confirmFinish()" style="width:100%; background:var(--success); padding:16px; border-radius:12px; color:black; font-weight:bold;">Save & Finish</button>
+            <button class="btn-reset" onclick="document.getElementById('modal-finish').classList.remove('open')" style="width:100%; padding:16px; margin-top:10px; color:var(--text-muted);">Back to Workout</button>
         </div>
     </div>
 
@@ -154,10 +179,9 @@
         }
 
         async function postData(action, payload) {
-            // Optimistic UI update happens in caller
             fetch(API_URL, {
                 method: 'POST',
-                mode: 'no-cors', // standard for GAS
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action, payload })
             });
@@ -197,7 +221,7 @@
             const newEx = { id: Date.now(), name, notes, tags };
             db.exercises.push(newEx);
             
-            postData('save_exercise', db.exercises); // Send full list
+            postData('save_exercise', db.exercises);
             document.getElementById('modal-add').classList.remove('open');
             renderManage();
         }
@@ -209,19 +233,7 @@
             renderManage();
         }
 
-        function finishSession() {
-            if(!confirm("Finish Workout?")) return;
-            activeSession.endTime = Date.now();
-            
-            // Log to local state & Cloud
-            db.history.push(activeSession);
-            postData('log_workout', activeSession);
-            
-            activeSession = null;
-            goHome();
-        }
-
-        // --- BUILDER / SESSION ---
+        // --- SESSION LOGIC ---
         function openMenu(day) {
             selectedIds.clear();
             document.getElementById('selCount').textContent = '0';
@@ -260,6 +272,7 @@
             if(selectedIds.size === 0) return;
             activeSession = {
                 id: Date.now(),
+                startTime: Date.now(), // Track start for duration calc
                 date: new Date().toISOString(),
                 items: db.exercises.filter(e => selectedIds.has(e.id)).map(e => ({...e, done:false, linked:false}))
             };
@@ -271,7 +284,6 @@
         function renderSession() {
             const list = document.getElementById('sessionList');
             list.innerHTML = activeSession.items.map((item, i) => {
-                // Link Logic
                 const prev = i > 0 && activeSession.items[i-1].linked;
                 const curr = item.linked;
                 let cls = '';
@@ -282,11 +294,18 @@
                 return `
                 <div class="superset-wrap">
                     <div class="session-item ${item.done?'done':''} ${cls}">
+                        
+                        <div class="reorder-controls">
+                            <button class="reorder-btn" onclick="moveItem(${i}, -1)" ${i===0?'style="opacity:0"':''}>▲</button>
+                            <button class="reorder-btn" onclick="moveItem(${i}, 1)" ${i===activeSession.items.length-1?'style="opacity:0"':''}>▼</button>
+                        </div>
+
                         <div class="check-circle" onclick="toggleDone(${i})">${item.done?'✓':''}</div>
+                        
                         <div style="flex:1">
                             <h3 style="margin:0;">${item.name}</h3>
                             <div style="font-size:12px; color:#888;">${item.notes}</div>
-                            <div onclick="toggleLink(${i})" style="font-size:12px; font-weight:bold; color:${item.linked?'var(--primary)':'#555'}; margin-top:8px;">
+                            <div onclick="toggleLink(${i})" style="font-size:12px; font-weight:bold; color:${item.linked?'var(--primary)':'#555'}; margin-top:8px; cursor:pointer;">
                                 ${item.linked ? '🔗 UNLINK' : '🔗 SUPERSET'}
                             </div>
                         </div>
@@ -294,6 +313,18 @@
                     <div class="link-bar"></div>
                 </div>`;
             }).join('');
+        }
+
+        function moveItem(index, direction) {
+            const newIndex = index + direction;
+            if(newIndex < 0 || newIndex >= activeSession.items.length) return;
+            
+            // Swap
+            const temp = activeSession.items[index];
+            activeSession.items[index] = activeSession.items[newIndex];
+            activeSession.items[newIndex] = temp;
+            
+            renderSession();
         }
 
         function toggleDone(i) {
@@ -304,6 +335,32 @@
             if(i === activeSession.items.length-1) return;
             activeSession.items[i].linked = !activeSession.items[i].linked;
             renderSession();
+        }
+
+        // --- FINISH WORKOUT ---
+        function openFinishModal() {
+            // Auto-calculate minutes
+            const mins = Math.round((Date.now() - activeSession.startTime) / 60000);
+            document.getElementById('finishDuration').value = mins;
+            document.getElementById('finishNotes').value = '';
+            document.getElementById('finishCals').value = '';
+            
+            document.getElementById('modal-finish').classList.add('open');
+        }
+
+        function confirmFinish() {
+            activeSession.endTime = Date.now();
+            activeSession.summary = document.getElementById('finishNotes').value;
+            activeSession.calories = document.getElementById('finishCals').value;
+            activeSession.duration = document.getElementById('finishDuration').value;
+
+            // Log to local state & Cloud
+            db.history.push(activeSession);
+            postData('log_workout', activeSession);
+            
+            document.getElementById('modal-finish').classList.remove('open');
+            activeSession = null;
+            goHome();
         }
 
         function renderManage() {
