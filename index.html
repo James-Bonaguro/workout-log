@@ -12,135 +12,141 @@
             --safe-bottom: env(safe-area-inset-bottom);
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); height: 100vh; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); height: 100vh; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; overflow: hidden; }
         
         .hidden { display: none !important; }
         .btn-reset { background: none; border: none; color: inherit; font: inherit; cursor: pointer; }
-        .screen { flex: 1; display: flex; flex-direction: column; padding: 16px; overflow-y: auto; padding-bottom: calc(40px + var(--safe-bottom)); }
+        .screen { flex: 1; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: calc(40px + var(--safe-bottom)); }
         
         /* Typography */
-        h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin: 0 0 20px 0; }
+        h1 { font-size: 32px; font-weight: 800; letter-spacing: -1px; margin: 0 0 24px 0; }
         h2 { font-size: 20px; font-weight: 600; margin: 0; }
         
-        /* Cards & Buttons */
-        .card { background: var(--surface); border-radius: 12px; padding: 12px; margin-bottom: 12px; border: 1px solid #2c2c2e; }
+        /* Planning Grid */
         .grid-select { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .day-btn { background: var(--surface-alt); padding: 24px 16px; border-radius: 12px; font-size: 17px; font-weight: 600; text-align: center; border: 1px solid #333; }
+        .day-btn { background: var(--surface-alt); padding: 30px 16px; border-radius: 16px; font-size: 18px; font-weight: 700; text-align: center; border: 1px solid #333; transition: 0.1s; }
+        .day-btn:active { background: var(--accent); transform: scale(0.96); }
         
-        /* Selection List */
-        .item-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #2c2c2e; }
-        .item-info { flex: 1; }
-        .item-name { font-weight: 500; font-size: 16px; }
-        .item-meta { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
-        .check-pill { width: 24px; height: 24px; border-radius: 6px; border: 2px solid #3a3a3c; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        /* Selection List (Night Before) */
+        .card { background: var(--surface); border-radius: 16px; padding: 8px 16px; border: 1px solid #2c2c2e; }
+        .item-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid #2c2c2e; }
+        .item-row:last-child { border-bottom: none; }
+        .item-name { font-weight: 500; font-size: 17px; }
+        .check-pill { width: 26px; height: 26px; border-radius: 8px; border: 2px solid #3a3a3c; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .selected .check-pill { background: var(--accent); border-color: var(--accent); color: white; }
 
-        /* Session Execution */
-        .session-block { background: var(--surface); border-radius: 12px; margin-bottom: 12px; border: 1px solid #2c2c2e; position: relative; }
-        .is-linked { border-bottom: 2px dashed var(--accent); margin-bottom: 2px; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-        .session-item { padding: 16px; display: flex; align-items: center; gap: 14px; }
-        .status-circle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--text-muted); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        .done { opacity: 0.4; }
+        /* Session Execution (The Gym) */
+        .session-block { background: var(--surface); border-radius: 14px; margin-bottom: 12px; border: 1px solid #2c2c2e; transition: 0.2s; }
+        .is-linked { border-bottom: 3px dashed var(--accent); margin-bottom: 4px; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+        .session-item { padding: 18px; display: flex; align-items: center; gap: 16px; }
+        .status-circle { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #3a3a3c; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; color: var(--text-muted); }
+        .done { opacity: 0.35; filter: grayscale(1); }
         .done .status-circle { background: var(--primary); border-color: var(--primary); color: black; }
 
         /* Vibe Tags */
-        .tag-btn { background: #1c1c1e; border: 1px solid #3a3a3c; color: var(--text); padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+        .tag-btn { background: #1c1c1e; border: 1px solid #3a3a3c; color: var(--text); padding: 10px 18px; border-radius: 24px; font-size: 14px; font-weight: 600; margin-bottom: 10px; }
         .tag-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
 
-        /* Global UI */
-        .fab { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--accent); color: white; padding: 16px 32px; border-radius: 30px; font-weight: 700; box-shadow: 0 8px 24px rgba(0,0,0,0.4); z-index: 100; min-width: 160px; text-align: center; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--surface-alt); width: 100%; max-width: 440px; border-radius: 24px; padding: 24px; }
-        .input-minimal { background: transparent; border: none; border-bottom: 2px solid #3a3a3c; color: white; font-size: 32px; font-weight: 700; width: 100%; text-align: center; outline: none; margin: 10px 0; }
-        .input-label { display: block; font-weight: 700; text-transform: uppercase; color: var(--text-muted); font-size: 11px; letter-spacing: 1px; }
+        /* Global UI Elements */
+        .fab { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: var(--accent); color: white; padding: 18px 40px; border-radius: 40px; font-weight: 800; font-size: 16px; letter-spacing: 0.5px; box-shadow: 0 12px 30px rgba(0,0,0,0.6); z-index: 100; min-width: 200px; text-align: center; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; backdrop-filter: blur(10px); }
+        .modal-content { background: var(--surface-alt); width: 100%; max-width: 440px; border-radius: 28px; padding: 32px; border: 1px solid #333; }
+        .input-minimal { background: transparent; border: none; border-bottom: 2px solid #3a3a3c; color: white; font-size: 48px; font-weight: 800; width: 100%; text-align: center; outline: none; margin: 20px 0; }
+        .input-label { display: block; font-weight: 800; text-transform: uppercase; color: var(--text-muted); font-size: 11px; letter-spacing: 1.5px; margin-bottom: 4px; }
     </style>
 </head>
 <body>
 
-    <div id="loader" class="overlay hidden"><div style="font-weight:600;">Syncing Cloud...</div></div>
+    <div id="loader" class="overlay hidden"><div style="font-weight:700; letter-spacing:2px; color:var(--accent);">SYNCING...</div></div>
 
     <div id="screen-home" class="screen">
-        <h1 id="dateDisplay">JB Daily</h1>
+        <h1 id="dateDisplay">JB DAILY</h1>
         <div class="grid-select">
             <button class="day-btn" onclick="openMenu('Push')">Push</button>
             <button class="day-btn" onclick="openMenu('Pull')">Pull</button>
             <button class="day-btn" onclick="openMenu('Legs')">Legs</button>
             <button class="day-btn" onclick="openMenu('Core')">Core</button>
         </div>
-        <div style="margin-top: 40px; text-align: center;">
-            <button class="btn-reset" onclick="openManage()" style="color:var(--text-muted); font-size: 14px; text-decoration: underline;">Database</button>
+        <div style="margin-top: auto; text-align: center; padding: 20px;">
+            <button class="btn-reset" onclick="openManage()" style="color:var(--text-muted); font-size: 13px; text-decoration: underline; opacity: 0.6;">Edit Movement Library</button>
         </div>
     </div>
 
     <div id="screen-menu" class="screen hidden">
-        <div style="display:flex; align-items:center; margin-bottom:20px;">
-            <button class="btn-reset" onclick="goHome()" style="font-size:24px; padding-right:15px;">←</button>
-            <h2 id="menuTitle">Select</h2>
+        <div style="display:flex; align-items:center; margin-bottom:24px;">
+            <button class="btn-reset" onclick="goHome()" style="font-size:28px; padding-right:20px;">←</button>
+            <h2 id="menuTitle">Select Routine</h2>
         </div>
         <div id="menuList" class="card"></div>
-        <button class="fab btn-reset" onclick="startWeightEntry()">START <span id="selCount">0</span></button>
+        <button class="fab btn-reset" onclick="startWeightEntry()">START WORKOUT <span id="selCount" style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:8px; margin-left:8px;">0</span></button>
     </div>
 
     <div id="modal-weight" class="overlay hidden">
         <div class="modal-content">
-            <h2 style="text-align:center;">Today's Weight</h2>
-            <input type="number" id="weightInput" class="input-minimal" placeholder="000.0" step="0.1">
-            <button class="btn-reset" onclick="confirmWeightAndStart()" style="width:100%; background:var(--accent); color:white; padding:18px; border-radius:14px; font-weight:700; margin-top:20px;">Proceed to Gym</button>
+            <h2 style="text-align:center; letter-spacing:-0.5px;">Current Weight</h2>
+            <input type="number" id="weightInput" class="input-minimal" placeholder="000.0" step="0.1" inputmode="decimal">
+            <button class="btn-reset" onclick="confirmWeightAndStart()" style="width:100%; background:var(--accent); color:white; padding:20px; border-radius:16px; font-weight:800; font-size:18px;">Proceed to Session</button>
+            <button class="btn-reset" onclick="document.getElementById('modal-weight').classList.add('hidden')" style="width:100%; color:var(--text-muted); margin-top:16px; font-size:14px;">Cancel</button>
         </div>
     </div>
 
     <div id="screen-session" class="screen hidden">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2 id="sessionTitle">In Progress</h2>
-            <button class="btn-reset" onclick="openFinishModal()" style="color:var(--primary); font-weight:700;">FINISH</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+            <h2 id="sessionTitle" style="color:var(--accent);">Training</h2>
+            <button class="btn-reset" onclick="openFinishModal()" style="color:var(--primary); font-weight:800; font-size:16px; letter-spacing:1px;">FINISH</button>
         </div>
         <div id="sessionList"></div>
     </div>
 
     <div id="modal-finish" class="overlay hidden">
-        <div class="modal-content" style="border: 1px solid var(--primary);">
+        <div class="modal-content" style="border: 2px solid var(--primary);">
             <div style="text-align:center; margin-bottom: 24px;">
-                <div style="font-size: 40px;">⚡</div>
-                <h2 style="color: var(--primary); margin: 8px 0;">Session Complete</h2>
-                <p id="summaryStats" style="color: var(--text-muted); font-size: 14px;"></p>
+                <div style="font-size: 44px; margin-bottom:10px;">⚡</div>
+                <h2 style="color: var(--primary); margin: 0; font-size:24px;">LIFT COMPLETE</h2>
+                <p id="summaryStats" style="color: var(--text-muted); font-size: 15px; margin-top:8px; font-weight:500;"></p>
             </div>
+            
             <label class="input-label">SESSION VIBE</label>
-            <div id="vibeTags" style="display: flex; gap: 8px; margin: 12px 0 20px 0; flex-wrap: wrap;">
+            <div id="vibeTags" style="display: flex; gap: 8px; margin: 12px 0 24px 0; flex-wrap: wrap;">
                 <button class="tag-btn" onclick="toggleVibe(this)">🔥 Strong</button>
                 <button class="tag-btn" onclick="toggleVibe(this)">⚡ Fast</button>
                 <button class="tag-btn" onclick="toggleVibe(this)">🧱 Heavy</button>
                 <button class="tag-btn" onclick="toggleVibe(this)">📉 Tired</button>
+                <button class="tag-btn" onclick="toggleVibe(this)">💎 PR</button>
             </div>
+
             <div class="grid-select">
                 <div>
-                    <label class="input-label">MINS</label>
-                    <input type="number" id="finishDuration" class="input-minimal" style="font-size: 20px;">
+                    <label class="input-label">MINUTES</label>
+                    <input type="number" id="finishDuration" class="input-minimal" style="font-size: 24px; margin: 8px 0;">
                 </div>
                 <div>
-                    <label class="input-label">CALS</label>
-                    <input type="number" id="finishCals" class="input-minimal" style="font-size: 20px;">
+                    <label class="input-label">EST. CALS</label>
+                    <input type="number" id="finishCals" class="input-minimal" style="font-size: 24px; margin: 8px 0;">
                 </div>
             </div>
-            <button class="btn-reset" onclick="confirmFinish()" style="width:100%; background:var(--primary); color:black; padding:18px; border-radius:14px; font-weight:800; margin-top:20px;">SAVE TO CLOUD</button>
+            
+            <button class="btn-reset" onclick="confirmFinish()" style="width:100%; background:var(--primary); color:black; padding:22px; border-radius:18px; font-weight:900; font-size:18px; letter-spacing:1px; margin-top:10px;">SAVE TO GOOGLE SHEET</button>
         </div>
     </div>
 
     <script>
-        // BACKEND URL
+        // API CONFIG
         const API_URL = 'https://script.google.com/macros/s/AKfycbwzpPVFs3eB0RGfEpl_DDZ7HK6sfnmm7vSEKN2ZwL-23a4_U110GR5QdU7pGRFdg2161w/exec';
         
         let db = { exercises: [], history: [], weight: {} };
         let activeSession = null;
-        let selectedIds = new Set();
+        let selectedIds = new Set(); // Selection order is preserved here
         const todayKey = new Date().toISOString().split('T')[0];
 
+        // --- DATA LAYER ---
         async function syncData() {
             document.getElementById('loader').classList.remove('hidden');
             try {
                 const res = await fetch(API_URL);
                 db = await res.json();
-                document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-            } catch(e) { console.error("Sync Error", e); }
+                document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }).toUpperCase();
+            } catch(e) { alert("Check Connection: Cloud Sync Failed"); }
             document.getElementById('loader').classList.add('hidden');
         }
 
@@ -148,6 +154,7 @@
             fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action, payload }) });
         }
 
+        // --- UI NAVIGATION ---
         function goHome() {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById('screen-home').classList.remove('hidden');
@@ -156,27 +163,39 @@
         function openMenu(day) {
             selectedIds.clear();
             document.getElementById('selCount').textContent = '0';
-            document.getElementById('menuTitle').textContent = day;
+            document.getElementById('menuTitle').textContent = day.toUpperCase();
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById('screen-menu').classList.remove('hidden');
+            
             const list = document.getElementById('menuList');
             const filtered = db.exercises.filter(e => e.tags.includes(day));
             list.innerHTML = filtered.map(ex => `
                 <div class="item-row" id="row-${ex.id}" onclick="toggleSelect(${ex.id})">
-                    <div class="item-info"><div class="item-name">${ex.name}</div></div>
+                    <div class="item-name">${ex.name}</div>
                     <div class="check-pill"></div>
                 </div>
             `).join('');
         }
 
+        // MAINTAINS TAP ORDER
         function toggleSelect(id) {
             const row = document.getElementById('row-'+id);
-            if(selectedIds.has(id)) { selectedIds.delete(id); row.classList.remove('selected'); row.querySelector('.check-pill').innerHTML = ''; }
-            else { selectedIds.add(id); row.classList.add('selected'); row.querySelector('.check-pill').innerHTML = '✓'; }
+            if(selectedIds.has(id)) {
+                selectedIds.delete(id);
+                row.classList.remove('selected');
+                row.querySelector('.check-pill').innerHTML = '';
+            } else {
+                selectedIds.add(id);
+                row.classList.add('selected');
+                row.querySelector('.check-pill').innerHTML = '✓';
+            }
             document.getElementById('selCount').textContent = selectedIds.size;
         }
 
-        function startWeightEntry() { if(selectedIds.size > 0) document.getElementById('modal-weight').classList.remove('hidden'); }
+        // --- SESSION LOGIC ---
+        function startWeightEntry() {
+            if(selectedIds.size > 0) document.getElementById('modal-weight').classList.remove('hidden');
+        }
 
         function confirmWeightAndStart() {
             const val = document.getElementById('weightInput').value;
@@ -186,9 +205,12 @@
         }
 
         function startSession() {
+            // Build workout from TAP ORDER
+            const orderedItems = Array.from(selectedIds).map(id => db.exercises.find(e => e.id === id));
+            
             activeSession = {
                 id: Date.now(), startTime: Date.now(), date: new Date().toISOString(),
-                items: db.exercises.filter(e => selectedIds.has(e.id)).map(e => ({...e, done:false, linked:false}))
+                items: orderedItems.map(e => ({...e, done:false, linked:false}))
             };
             renderSession();
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
@@ -203,8 +225,9 @@
                         <div class="status-circle" onclick="toggleDone(${i})">${item.done ? '✓' : i+1}</div>
                         <div style="flex:1" onclick="toggleDone(${i})">
                             <div class="item-name">${item.name}</div>
+                            <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${item.notes || ''}</div>
                         </div>
-                        <button class="btn-reset" onclick="toggleLink(${i})" style="color:var(--accent); font-size:20px;">
+                        <button class="btn-reset" onclick="toggleLink(${i})" style="color:var(--accent); font-size:24px; padding:10px;">
                             ${item.linked ? '🔓' : '🔗'}
                         </button>
                     </div>
@@ -217,8 +240,9 @@
         function toggleVibe(el) { el.classList.toggle('active'); }
 
         function openFinishModal() {
+            const done = activeSession.items.filter(i=>i.done).length;
             const mins = Math.round((Date.now() - activeSession.startTime) / 60000);
-            document.getElementById('summaryStats').textContent = `${activeSession.items.filter(i=>i.done).length} Movements Completed`;
+            document.getElementById('summaryStats').textContent = `${done} / ${activeSession.items.length} MOVEMENTS COMPLETED`;
             document.getElementById('finishDuration').value = mins;
             document.getElementById('modal-finish').classList.remove('hidden');
         }
@@ -228,10 +252,15 @@
             activeSession.summary = vibes.join(', ');
             activeSession.calories = document.getElementById('finishCals').value || 0;
             activeSession.duration = document.getElementById('finishDuration').value;
+            
             postData('log_workout', activeSession);
             document.getElementById('modal-finish').classList.add('hidden');
             activeSession = null;
             goHome();
+        }
+
+        function openManage() {
+            alert("To update movements, edit the 'Exercises' tab in your Google Sheet and the app will sync automatically.");
         }
 
         syncData();
